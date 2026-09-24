@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Investment Decision Architecture",
+    "animation": "none",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1440,
+      780
+    ],
+    "views": [
+      {
+        "id": "evidence-to-thesis",
+        "label": "Evidence → Thesis",
+        "focus": [
+          "market_data",
+          "fundamentals",
+          "macro",
+          "discovery",
+          "research"
+        ],
+        "note": "Ideas become investable only after external evidence is converted into a causal thesis."
+      },
+      {
+        "id": "decision-gate",
+        "label": "Decision Gate",
+        "focus": [
+          "valuation",
+          "risk_gate",
+          "portfolio_fit",
+          "sizing"
+        ],
+        "note": "Expected asymmetry is filtered through explicit failure conditions, portfolio interaction and risk budget."
+      },
+      {
+        "id": "feedback-loop",
+        "label": "Live Feedback Loop",
+        "focus": [
+          "implement",
+          "position",
+          "monitor",
+          "research",
+          "risk_gate"
+        ],
+        "note": "A live position is continuously re-evaluated against new evidence and its original invalidation conditions."
+      }
+    ],
+    "legend": {
+      "mode": "all",
+      "entries": {
+        "external": {
+          "label": "Evidence source"
+        },
+        "backend": {
+          "label": "Analysis"
+        },
+        "security": {
+          "label": "Risk / decision gate"
+        },
+        "frontend": {
+          "label": "Action"
+        },
+        "database": {
+          "label": "Portfolio state"
+        },
+        "messagebus": {
+          "label": "Feedback / monitoring"
+        }
+      }
+    }
+  },
+  "components": [
+    {
+      "id": "market_data",
+      "type": "external",
+      "label": "Market Data",
+      "sublabel": "price • volume • volatility",
+      "tag": "Discover",
+      "pos": [
+        65,
+        135
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "type": "external",
+      "label": "Fundamentals",
+      "sublabel": "earnings • balance sheet • cash flow",
+      "tag": "Educate",
+      "pos": [
+        65,
+        270
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "macro",
+      "type": "external",
+      "label": "Macro / Cross-Asset",
+      "sublabel": "rates • liquidity • regimes",
+      "tag": "Educate",
+      "pos": [
+        65,
+        405
+      ],
+      "size": [
+        190,
+        72
+      ]
+    },
+    {
+      "id": "discovery",
+      "type": "backend",
+      "label": "Opportunity Discovery",
+      "sublabel": "screening • dislocations • catalysts",
+      "tag": "Discover",
+      "pos": [
+        330,
+        135
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "research",
+      "type": "backend",
+      "label": "Research & Thesis",
+      "sublabel": "drivers • causality • evidence",
+      "tag": "Educate",
+      "pos": [
+        330,
+        305
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "valuation",
+      "type": "backend",
+      "label": "Valuation / Asymmetry",
+      "sublabel": "expected value • upside/downside",
+      "tag": "Evaluate",
+      "pos": [
+        590,
+        305
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "risk_gate",
+      "type": "security",
+      "label": "Risk & Invalidation",
+      "sublabel": "failure modes • exit conditions",
+      "tag": "Evaluate",
+      "pos": [
+        850,
+        190
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "portfolio_fit",
+      "type": "security",
+      "label": "Portfolio Fit",
+      "sublabel": "correlation • concentration • regime",
+      "tag": "Evaluate",
+      "pos": [
+        850,
+        335
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "sizing",
+      "type": "backend",
+      "label": "Position Sizing",
+      "sublabel": "risk budget • conviction • liquidity",
+      "tag": "Evaluate",
+      "pos": [
+        850,
+        480
+      ],
+      "size": [
+        210,
+        78
+      ]
+    },
+    {
+      "id": "implement",
+      "type": "frontend",
+      "label": "Implement",
+      "sublabel": "instrument • timing • execution plan",
+      "tag": "Perform",
+      "pos": [
+        1110,
+        305
+      ],
+      "size": [
+        190,
+        78
+      ]
+    },
+    {
+      "id": "position",
+      "type": "database",
+      "label": "Live Position",
+      "sublabel": "exposure • P&L • thesis state",
+      "tag": "Perform",
+      "pos": [
+        1110,
+        455
+      ],
+      "size": [
+        190,
+        78
+      ]
+    },
+    {
+      "id": "monitor",
+      "type": "messagebus",
+      "label": "Monitor & Re-evaluate",
+      "sublabel": "new evidence • triggers • replacement",
+      "tag": "Perform",
+      "pos": [
+        1110,
+        605
+      ],
+      "size": [
+        210,
+        78
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "External Evidence",
+      "wraps": [
+        "market_data",
+        "fundamentals",
+        "macro"
+      ],
+      "pad": 25
+    },
+    {
+      "kind": "region",
+      "label": "Research & Evaluation",
+      "wraps": [
+        "discovery",
+        "research",
+        "valuation"
+      ],
+      "pad": 25
+    },
+    {
+      "kind": "region",
+      "label": "Decision Controls",
+      "wraps": [
+        "risk_gate",
+        "portfolio_fit",
+        "sizing"
+      ],
+      "pad": 25
+    },
+    {
+      "kind": "region",
+      "label": "Implementation & Feedback",
+      "wraps": [
+        "implement",
+        "position",
+        "monitor"
+      ],
+      "pad": 25
+    }
+  ],
+  "connections": [
+    {
+      "id": "c_market_discovery",
+      "from": "market_data",
+      "to": "discovery",
+      "label": "screen",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_fund_research",
+      "from": "fundamentals",
+      "to": "research",
+      "label": "business evidence"
+    },
+    {
+      "id": "c_macro_research",
+      "from": "macro",
+      "to": "research",
+      "label": "regime context"
+    },
+    {
+      "id": "c_discovery_research",
+      "from": "discovery",
+      "to": "research",
+      "label": "candidate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_research_valuation",
+      "from": "research",
+      "to": "valuation",
+      "label": "causal thesis",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_valuation_risk",
+      "from": "valuation",
+      "to": "risk_gate",
+      "label": "expected asymmetry",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_risk_fit",
+      "from": "risk_gate",
+      "to": "portfolio_fit",
+      "label": "survives invalidation test",
+      "variant": "security"
+    },
+    {
+      "id": "c_fit_sizing",
+      "from": "portfolio_fit",
+      "to": "sizing",
+      "label": "risk allowance",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_sizing_implement",
+      "from": "sizing",
+      "to": "implement",
+      "label": "approved exposure",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_implement_position",
+      "from": "implement",
+      "to": "position",
+      "label": "filled position",
+      "variant": "emphasis"
+    },
+    {
+      "id": "c_position_monitor",
+      "from": "position",
+      "to": "monitor",
+      "label": "live state",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_market_monitor",
+      "from": "market_data",
+      "to": "monitor",
+      "label": "price / volatility",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_monitor_research",
+      "from": "monitor",
+      "to": "research",
+      "label": "new evidence / thesis update",
+      "variant": "dashed"
+    },
+    {
+      "id": "c_monitor_risk",
+      "from": "monitor",
+      "to": "risk_gate",
+      "label": "invalidation trigger",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Decision Principle",
+      "items": [
+        "Evidence precedes action; price movement alone is not a thesis.",
+        "Separate opportunity quality from portfolio sizing.",
+        "Make invalidation conditions explicit before implementation."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Asymmetry Test",
+      "items": [
+        "Compare expected upside, downside and probability—not forecast precision alone.",
+        "Reject attractive standalone ideas that worsen portfolio concentration or regime exposure.",
+        "Sizing is the final expression of conviction after risk constraints."
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Feedback Loop",
+      "items": [
+        "Monitor whether the causal thesis is strengthening, weakening or unchanged.",
+        "Re-evaluate when new evidence arrives or an invalidation condition is approached.",
+        "A valid replacement opportunity can be a reason to exit even without thesis failure."
+      ]
+    }
+  ]
+}

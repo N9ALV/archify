@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "title": "Investment decision gate",
+  "state": "pre-entry",
+  "nodes": [
+    {
+      "id": "evidence",
+      "kind": "information",
+      "stage": "discover",
+      "label": "Evidence set",
+      "body": "Market, business and regime evidence"
+    },
+    {
+      "id": "thesis",
+      "kind": "yes_no",
+      "stage": "educate",
+      "label": "Thesis intact?",
+      "value": true,
+      "outputs": {
+        "yes": "return_hurdle",
+        "no": "re_evaluate"
+      }
+    },
+    {
+      "id": "return_hurdle",
+      "kind": "number_compare",
+      "stage": "evaluate",
+      "label": "Expected return hurdle",
+      "left": {
+        "label": "Expected",
+        "value": 14,
+        "unit": "%"
+      },
+      "operator": ">",
+      "right": {
+        "label": "Required",
+        "value": 10,
+        "unit": "%"
+      },
+      "outputs": {
+        "pass": "portfolio_fit",
+        "fail": "watch"
+      }
+    },
+    {
+      "id": "portfolio_fit",
+      "kind": "number_compare",
+      "stage": "evaluate",
+      "label": "Portfolio exposure",
+      "left": {
+        "label": "Resulting exposure",
+        "value": 6,
+        "unit": "%"
+      },
+      "operator": "<=",
+      "right": {
+        "label": "Maximum",
+        "value": 8,
+        "unit": "%"
+      },
+      "outputs": {
+        "pass": "implement",
+        "fail": "watch"
+      }
+    },
+    {
+      "id": "implement",
+      "kind": "outcome",
+      "stage": "perform",
+      "label": "Implement"
+    },
+    {
+      "id": "watch",
+      "kind": "outcome",
+      "stage": "perform",
+      "label": "Watch / reject"
+    },
+    {
+      "id": "re_evaluate",
+      "kind": "outcome",
+      "stage": "evaluate",
+      "label": "Re-evaluate"
+    }
+  ]
+}

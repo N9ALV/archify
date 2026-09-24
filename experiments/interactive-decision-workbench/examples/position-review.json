@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "title": "Existing position review",
+  "state": "live-position",
+  "principles": [
+    "Entry failure is not automatically an exit.",
+    "Known hard exits take priority over softer review triggers.",
+    "Unknown evidence remains unresolved."
+  ],
+  "nodes": [
+    {
+      "id": "hard_exit",
+      "kind": "yes_no",
+      "stage": "perform",
+      "label": "Hard exit triggered?",
+      "value": false,
+      "outputs": {
+        "yes": "exit",
+        "no": "drift"
+      }
+    },
+    {
+      "id": "drift",
+      "kind": "number_compare",
+      "stage": "perform",
+      "label": "Thesis drift",
+      "left": {
+        "label": "Current drift",
+        "value": 42,
+        "unit": "pts"
+      },
+      "operator": ">",
+      "right": {
+        "label": "Review threshold",
+        "value": 60,
+        "unit": "pts"
+      },
+      "outputs": {
+        "pass": "re_evaluate",
+        "fail": "hold"
+      }
+    },
+    {
+      "id": "exit",
+      "kind": "outcome",
+      "stage": "perform",
+      "label": "Exit / close"
+    },
+    {
+      "id": "re_evaluate",
+      "kind": "outcome",
+      "stage": "evaluate",
+      "label": "Re-evaluate opportunity"
+    },
+    {
+      "id": "hold",
+      "kind": "outcome",
+      "stage": "perform",
+      "label": "Hold / continue monitoring"
+    }
+  ]
+}
