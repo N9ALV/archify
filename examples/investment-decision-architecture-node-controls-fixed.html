@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="generator" content="Archify 2.15-compatible fallback composition">
+<title>Conditional Investment Decision Architecture</title>
+<style>
+:root {
+  --bg:#020617; --panel:rgba(15,23,42,.78); --border:#1e293b; --text:#f8fafc; --muted:#94a3b8;
+  --grid:#1e293b; --mask:#0f172a; --edge:#64748b; --em:#34d399; --sec:#fb7185; --dash:#fb923c;
+  --shadow:0 18px 60px rgba(0,0,0,.24); --tag:#172554; --tagtext:#bfdbfe;
+}
+html[data-theme="light"] {
+  --bg:#f8fafc; --panel:rgba(255,255,255,.94); --border:#dbe4ee; --text:#0f172a; --muted:#64748b;
+  --grid:#e2e8f0; --mask:#fff; --edge:#94a3b8; --em:#059669; --sec:#e11d48; --dash:#ea580c;
+  --shadow:0 18px 60px rgba(15,23,42,.10); --tag:#dbeafe; --tagtext:#1e3a8a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.shell{max-width:1560px;margin:0 auto;padding:22px}
+.header{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-size:28px;margin:5px 0 5px;letter-spacing:-.025em}
+.subtitle{margin:0;color:var(--muted);font-size:14px;max-width:900px;line-height:1.5}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+button,input{font:inherit}
+button{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:9px;padding:8px 10px;cursor:pointer}
+button:hover,button.active{border-color:var(--em)}
+.search{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:9px;padding:8px 10px;width:190px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.diagram-wrap{position:relative;overflow:auto;min-height:580px}
+#diagram{display:block;width:100%;height:auto;min-width:1050px}
+.grid-bg{fill:url(#grid)}
+.grid-line{stroke:var(--grid);fill:none}
+.boundary rect{fill:transparent;stroke:var(--border);stroke-width:1.5;stroke-dasharray:6 6}
+.boundary-label{fill:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.node{cursor:pointer;transition:opacity .18s ease}
+.node-mask{fill:var(--mask);stroke:none}
+.node-box{stroke-width:1.7}
+.node-title{fill:var(--text);font-size:14px;font-weight:700}
+.node-sub{fill:var(--muted);font-size:10.5px}
+.node-external .node-box{fill:rgba(30,41,59,.88);stroke:#94a3b8}
+.node-backend .node-box{fill:rgba(6,78,59,.58);stroke:#34d399}
+.node-security .node-box{fill:rgba(136,19,55,.56);stroke:#fb7185}
+.node-frontend .node-box{fill:rgba(8,51,68,.65);stroke:#22d3ee}
+.node-database .node-box{fill:rgba(76,29,149,.56);stroke:#a78bfa}
+.node-messagebus .node-box{fill:rgba(124,45,18,.56);stroke:#fb923c}
+html[data-theme="light"] .node-external .node-box{fill:#f1f5f9;stroke:#64748b}
+html[data-theme="light"] .node-backend .node-box{fill:#ecfdf5;stroke:#059669}
+html[data-theme="light"] .node-security .node-box{fill:#fff1f2;stroke:#e11d48}
+html[data-theme="light"] .node-frontend .node-box{fill:#ecfeff;stroke:#0891b2}
+html[data-theme="light"] .node-database .node-box{fill:#f5f3ff;stroke:#7c3aed}
+html[data-theme="light"] .node-messagebus .node-box{fill:#fff7ed;stroke:#ea580c}
+.tag-bg{fill:var(--tag);stroke:none} .tag-text{fill:var(--tagtext);font-size:9px;font-weight:800}
+.edge path{fill:none;stroke:var(--edge);stroke-width:1.55}
+.edge-emphasis path{stroke:var(--em);stroke-width:2.1}
+.edge-security path{stroke:var(--sec);stroke-width:1.8}
+.edge-dashed path{stroke:var(--dash);stroke-dasharray:6 5}
+.marker-default{fill:var(--edge)} .marker-emphasis{fill:var(--em)} .marker-security{fill:var(--sec)} .marker-dashed{fill:var(--dash)}
+.edge-label rect{fill:var(--mask);opacity:.96} .edge-label text{fill:var(--muted);font-size:10px;font-weight:600}
+.dim{opacity:.12!important} .focus{opacity:1!important;filter:drop-shadow(0 0 7px rgba(52,211,153,.28))}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border);color:var(--muted);font-size:12px}
+.legend span{display:inline-flex;gap:6px;align-items:center} .legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.views{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border)}
+.view-note{padding:0 16px 14px;color:var(--muted);font-size:12px;min-height:30px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:15px 16px}
+.card-head{display:flex;align-items:center;gap:8px} .card-head h3{font-size:14px;margin:0}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block} .dot.cyan{background:#22d3ee} .dot.emerald{background:#34d399} .dot.orange{background:#fb923c}
+.card ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.55}
+.footer{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;padding:12px 2px}
+.details{position:absolute;right:14px;top:14px;width:285px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow);display:none}
+.details.show{display:block} .details h4{margin:0 0 4px} .details p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+@media(max-width:900px){.header{display:block}.toolbar{justify-content:flex-start;margin-top:12px}.cards{grid-template-columns:1fr}.shell{padding:12px}}
+
+
+/* Controls visually anchored to SVG nodes */
+.diagram-wrap{position:relative}
+.node-overlay{
+  position:absolute;
+  z-index:20;
+  pointer-events:auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 7px 7px;
+}
+.node-overlay-inner{
+  width:100%;
+  border-top:1px solid var(--border);
+  padding-top:5px;
+}
+.node-compare{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);
+  gap:4px;
+  align-items:center;
+}
+.node-input{
+  min-width:0;
+  height:25px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--mask);
+  color:var(--text);
+  text-align:center;
+  font:800 11px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  outline:none;
+  padding:2px 3px;
+}
+.node-input:focus{border-color:var(--em)}
+.node-op{color:var(--muted);font-size:12px;font-weight:900;text-align:center}
+.node-toggle{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:3px;
+}
+.node-toggle button{
+  height:25px;
+  padding:2px 5px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  background:var(--mask);
+  color:var(--muted);
+  font:800 10px/1 Inter,ui-sans-serif,system-ui,sans-serif;
+}
+.node-toggle button.selected{
+  border-color:var(--em);
+  color:var(--text);
+  background:var(--tag);
+}
+.node-mini-state{
+  margin-top:3px;
+  text-align:center;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.1;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.node-mini-state.pass{color:#34d399}
+.node-mini-state.watch{color:#fbbf24}
+.node-mini-state.fail{color:#fb7185}
+
+.node.decision-pass .node-box{stroke:#34d399!important;stroke-width:3!important}
+.node.decision-fail .node-box{stroke:#fb7185!important;stroke-width:3!important}
+.node.decision-watch .node-box{stroke:#fbbf24!important;stroke-width:3!important}
+.edge.decision-active path{stroke:#34d399!important;stroke-width:3!important;stroke-dasharray:none!important}
+.edge.decision-exit path{stroke:#fb7185!important;stroke-width:3!important;stroke-dasharray:none!important}
+.edge.decision-watch path{stroke:#fbbf24!important;stroke-width:3!important;stroke-dasharray:6 4!important}
+
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="header">
+    <div>
+      <div class="eyebrow">Investment process • architecture view</div>
+      <h1>Investment Decision Architecture</h1>
+      <p class="subtitle">External evidence feeds a structured path from opportunity discovery to thesis, asymmetry, risk, portfolio fit, sizing, implementation and continuous re-evaluation.</p>
+    </div>
+    <div class="toolbar">
+      <input id="search" class="search" type="search" placeholder="Search nodes…" aria-label="Search nodes">
+      <button id="resetBtn">Reset</button>
+      <button id="themeBtn">Light / Dark</button>
+      <button id="svgBtn">Export SVG</button>
+    </div>
+  </header>
+
+  
+<section class="panel">
+    <div class="diagram-wrap">
+      <svg id="diagram" viewBox="0 0 1440 780" role="img" aria-labelledby="svgTitle svgDesc" xmlns="http://www.w3.org/2000/svg">
+<title id="svgTitle">Investment Decision Architecture</title>
+<desc id="svgDesc">Investment process from external evidence through research, risk, sizing, implementation and monitoring.</desc>
+<defs>
+  <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" class="marker-default"/></marker>
+  <marker id="arrow-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" class="marker-emphasis"/></marker>
+  <marker id="arrow-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" class="marker-security"/></marker>
+  <marker id="arrow-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" class="marker-dashed"/></marker>
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" class="grid-line"/></pattern>
+</defs>
+<rect width="1440" height="780" class="grid-bg"/>
+<g class="boundary" data-boundary="External Evidence"><rect x="40" y="88" width="240" height="414" rx="16"/><text x="54" y="106" class="boundary-label">External Evidence</text></g>
+<g class="boundary" data-boundary="Research &amp; Evaluation"><rect x="305" y="88" width="520" height="320" rx="16"/><text x="319" y="106" class="boundary-label">Research &amp; Evaluation</text></g>
+<g class="boundary" data-boundary="Decision Controls"><rect x="825" y="143" width="260" height="440" rx="16"/><text x="839" y="161" class="boundary-label">Decision Controls</text></g>
+<g class="boundary" data-boundary="Implementation &amp; Feedback"><rect x="1085" y="258" width="260" height="450" rx="16"/><text x="1099" y="276" class="boundary-label">Implementation &amp; Feedback</text></g>
+<g class="edge edge-emphasis" data-edge-id="c_market_discovery" data-from="market_data" data-to="discovery"><path d="M255,171.0 H292.5 V174.0 H330" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(292.5,165.5)"><rect x="-5" y="-13" width="64" height="20" transform="translate(-27.0,0)" rx="5"/><text text-anchor="middle">screen</text></g>
+</g>
+<g class="edge edge-default" data-edge-id="c_fund_research" data-from="fundamentals" data-to="research"><path d="M255,306.0 H292.5 V344.0 H330" marker-end="url(#arrow)"/>
+<g class="edge-label" transform="translate(292.5,318.0)"><rect x="-5" y="-13" width="119" height="20" transform="translate(-54.4,0)" rx="5"/><text text-anchor="middle">business evidence</text></g>
+</g>
+<g class="edge edge-default" data-edge-id="c_macro_research" data-from="macro" data-to="research"><path d="M255,441.0 V392.5 H330 V344.0" marker-end="url(#arrow)"/>
+<g class="edge-label" transform="translate(292.5,385.5)"><rect x="-5" y="-13" width="100" height="20" transform="translate(-44.8,0)" rx="5"/><text text-anchor="middle">regime context</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_discovery_research" data-from="discovery" data-to="research"><path d="M435.0,213 V259.0 H435.0 V305" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(435.0,252.0)"><rect x="-5" y="-13" width="68" height="20" transform="translate(-28.8,0)" rx="5"/><text text-anchor="middle">candidate</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_research_valuation" data-from="research" data-to="valuation"><path d="M540,344.0 H565.0 V344.0 H590" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(565.0,337.0)"><rect x="-5" y="-13" width="93" height="20" transform="translate(-41.6,0)" rx="5"/><text text-anchor="middle">causal thesis</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_valuation_risk" data-from="valuation" data-to="risk_gate"><path d="M800,344.0 V286.5 H850 V229.0" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(825.0,279.5)"><rect x="-5" y="-13" width="125" height="20" transform="translate(-57.6,0)" rx="5"/><text text-anchor="middle">expected asymmetry</text></g>
+</g>
+<g class="edge edge-security" data-edge-id="c_risk_fit" data-from="risk_gate" data-to="portfolio_fit"><path d="M955.0,268 V301.5 H955.0 V335" marker-end="url(#arrow-security)"/>
+<g class="edge-label" transform="translate(955.0,294.5)"><rect x="-5" y="-13" width="176" height="20" transform="translate(-83.2,0)" rx="5"/><text text-anchor="middle">survives invalidation test</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_fit_sizing" data-from="portfolio_fit" data-to="sizing"><path d="M955.0,413 V446.5 H955.0 V480" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(955.0,439.5)"><rect x="-5" y="-13" width="100" height="20" transform="translate(-44.8,0)" rx="5"/><text text-anchor="middle">risk allowance</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_sizing_implement" data-from="sizing" data-to="implement"><path d="M1060,519.0 V431.5 H1110 V344.0" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(1085.0,424.5)"><rect x="-5" y="-13" width="119" height="20" transform="translate(-54.4,0)" rx="5"/><text text-anchor="middle">approved exposure</text></g>
+</g>
+<g class="edge edge-emphasis" data-edge-id="c_implement_position" data-from="implement" data-to="position"><path d="M1205.0,383 V419.0 H1205.0 V455" marker-end="url(#arrow-emphasis)"/>
+<g class="edge-label" transform="translate(1205.0,412.0)"><rect x="-5" y="-13" width="106" height="20" transform="translate(-48.0,0)" rx="5"/><text text-anchor="middle">filled position</text></g>
+</g>
+<g class="edge edge-dashed" data-edge-id="c_position_monitor" data-from="position" data-to="monitor"><path d="M1205.0,533 V569.0 H1215.0 V605" marker-end="url(#arrow-dashed)"/>
+<g class="edge-label" transform="translate(1210.0,562.0)"><rect x="-5" y="-13" width="74" height="20" transform="translate(-32.0,0)" rx="5"/><text text-anchor="middle">live state</text></g>
+</g>
+<g class="edge edge-dashed" data-edge-id="c_market_monitor" data-from="market_data" data-to="monitor"><path d="M255,171.0 H682.5 V644.0 H1110" marker-end="url(#arrow-dashed)"/>
+<g class="edge-label" transform="translate(682.5,400.5)"><rect x="-5" y="-13" width="125" height="20" transform="translate(-57.6,0)" rx="5"/><text text-anchor="middle">price / volatility</text></g>
+</g>
+<g class="edge edge-dashed" data-edge-id="c_monitor_research" data-from="monitor" data-to="research"><path d="M1110,644.0 H825.0 V344.0 H540" marker-end="url(#arrow-dashed)"/>
+<g class="edge-label" transform="translate(825.0,487.0)"><rect x="-5" y="-13" width="189" height="20" transform="translate(-89.6,0)" rx="5"/><text text-anchor="middle">new evidence / thesis update</text></g>
+</g>
+<g class="edge edge-security" data-edge-id="c_monitor_risk" data-from="monitor" data-to="risk_gate"><path d="M1215.0,605 V436.5 H955.0 V268" marker-end="url(#arrow-security)"/>
+<g class="edge-label" transform="translate(1085.0,429.5)"><rect x="-5" y="-13" width="138" height="20" transform="translate(-64.0,0)" rx="5"/><text text-anchor="middle">invalidation trigger</text></g>
+</g>
+<g class="node node-external" data-node-id="market_data" tabindex="0" role="button" aria-label="Market Data: price • volume • volatility">
+<rect class="node-mask" x="65" y="135" width="190" height="72" rx="12"/>
+<rect class="node-box" x="65" y="135" width="190" height="72" rx="12"/>
+<text x="79" y="161" class="node-title">Market Data</text>
+<text x="79" y="183" class="node-sub">price • volume • volatility</text>
+<rect x="175" y="143" width="72" height="18" rx="9" class="tag-bg"/><text x="211.0" y="156" text-anchor="middle" class="tag-text">Discover</text>
+</g>
+<g class="node node-external" data-node-id="fundamentals" tabindex="0" role="button" aria-label="Fundamentals: earnings • balance sheet • cash flow">
+<rect class="node-mask" x="65" y="270" width="190" height="72" rx="12"/>
+<rect class="node-box" x="65" y="270" width="190" height="72" rx="12"/>
+<text x="79" y="296" class="node-title">Fundamentals</text>
+<text x="79" y="318" class="node-sub">earnings • balance sheet • cash flow</text>
+<rect x="182" y="278" width="65" height="18" rx="9" class="tag-bg"/><text x="214.5" y="291" text-anchor="middle" class="tag-text">Educate</text>
+</g>
+<g class="node node-external" data-node-id="macro" tabindex="0" role="button" aria-label="Macro / Cross-Asset: rates • liquidity • regimes">
+<rect class="node-mask" x="65" y="405" width="190" height="72" rx="12"/>
+<rect class="node-box" x="65" y="405" width="190" height="72" rx="12"/>
+<text x="79" y="431" class="node-title">Macro / Cross-Asset</text>
+<text x="79" y="453" class="node-sub">rates • liquidity • regimes</text>
+<rect x="182" y="413" width="65" height="18" rx="9" class="tag-bg"/><text x="214.5" y="426" text-anchor="middle" class="tag-text">Educate</text>
+</g>
+<g class="node node-backend" data-node-id="discovery" tabindex="0" role="button" aria-label="Opportunity Discovery: screening • dislocations • catalysts">
+<rect class="node-mask" x="330" y="135" width="210" height="78" rx="12"/>
+<rect class="node-box" x="330" y="135" width="210" height="78" rx="12"/>
+<text x="344" y="161" class="node-title">Opportunity Discovery</text>
+<text x="344" y="183" class="node-sub">screening • dislocations • catalysts</text>
+<rect x="460" y="143" width="72" height="18" rx="9" class="tag-bg"/><text x="496.0" y="156" text-anchor="middle" class="tag-text">Discover</text>
+</g>
+<g class="node node-backend" data-node-id="research" tabindex="0" role="button" aria-label="Research &amp; Thesis: drivers • causality • evidence">
+<rect class="node-mask" x="330" y="305" width="210" height="78" rx="12"/>
+<rect class="node-box" x="330" y="305" width="210" height="78" rx="12"/>
+<text x="344" y="331" class="node-title">Research &amp; Thesis</text>
+<text x="344" y="353" class="node-sub">drivers • causality • evidence</text>
+<rect x="467" y="313" width="65" height="18" rx="9" class="tag-bg"/><text x="499.5" y="326" text-anchor="middle" class="tag-text">Educate</text>
+</g>
+<g class="node node-backend" data-node-id="valuation" tabindex="0" role="button" aria-label="Valuation / Asymmetry: expected value • upside/downside">
+<rect class="node-mask" x="590" y="305" width="210" height="78" rx="12"/>
+<rect class="node-box" x="590" y="305" width="210" height="78" rx="12"/>
+<text x="604" y="331" class="node-title">Valuation / Asymmetry</text>
+<text x="604" y="349" class="node-sub">expected value • hurdle test</text>
+<rect x="720" y="313" width="72" height="18" rx="9" class="tag-bg"/><text x="756.0" y="326" text-anchor="middle" class="tag-text">Evaluate</text>
+</g>
+<g class="node node-security" data-node-id="risk_gate" tabindex="0" role="button" aria-label="Risk &amp; Invalidation: failure modes • exit conditions">
+<rect class="node-mask" x="850" y="190" width="210" height="78" rx="12"/>
+<rect class="node-box" x="850" y="190" width="210" height="78" rx="12"/>
+<text x="864" y="216" class="node-title">Risk &amp; Invalidation</text>
+<text x="864" y="234" class="node-sub">thesis validity gate</text>
+<rect x="980" y="198" width="72" height="18" rx="9" class="tag-bg"/><text x="1016.0" y="211" text-anchor="middle" class="tag-text">Evaluate</text>
+</g>
+<g class="node node-security" data-node-id="portfolio_fit" tabindex="0" role="button" aria-label="Portfolio Fit: correlation • concentration • regime">
+<rect class="node-mask" x="850" y="335" width="210" height="78" rx="12"/>
+<rect class="node-box" x="850" y="335" width="210" height="78" rx="12"/>
+<text x="864" y="361" class="node-title">Portfolio Fit</text>
+<text x="864" y="383" class="node-sub">correlation • concentration • regime</text>
+<rect x="980" y="343" width="72" height="18" rx="9" class="tag-bg"/><text x="1016.0" y="356" text-anchor="middle" class="tag-text">Evaluate</text>
+</g>
+<g class="node node-backend" data-node-id="sizing" tabindex="0" role="button" aria-label="Position Sizing: risk budget • conviction • liquidity">
+<rect class="node-mask" x="850" y="480" width="210" height="78" rx="12"/>
+<rect class="node-box" x="850" y="480" width="210" height="78" rx="12"/>
+<text x="864" y="506" class="node-title">Position Sizing</text>
+<text x="864" y="528" class="node-sub">risk budget • conviction • liquidity</text>
+<rect x="980" y="488" width="72" height="18" rx="9" class="tag-bg"/><text x="1016.0" y="501" text-anchor="middle" class="tag-text">Evaluate</text>
+</g>
+<g class="node node-frontend" data-node-id="implement" tabindex="0" role="button" aria-label="Implement: instrument • timing • execution plan">
+<rect class="node-mask" x="1110" y="305" width="190" height="78" rx="12"/>
+<rect class="node-box" x="1110" y="305" width="190" height="78" rx="12"/>
+<text x="1124" y="331" class="node-title">Implement</text>
+<text x="1124" y="353" class="node-sub">instrument • timing • execution plan</text>
+<rect x="1227" y="313" width="65" height="18" rx="9" class="tag-bg"/><text x="1259.5" y="326" text-anchor="middle" class="tag-text">Perform</text>
+</g>
+<g class="node node-database" data-node-id="position" tabindex="0" role="button" aria-label="Live Position: exposure • P&amp;L • thesis state">
+<rect class="node-mask" x="1110" y="455" width="190" height="78" rx="12"/>
+<rect class="node-box" x="1110" y="455" width="190" height="78" rx="12"/>
+<text x="1124" y="481" class="node-title">Live Position</text>
+<text x="1124" y="503" class="node-sub">exposure • P&amp;L • thesis state</text>
+<rect x="1227" y="463" width="65" height="18" rx="9" class="tag-bg"/><text x="1259.5" y="476" text-anchor="middle" class="tag-text">Perform</text>
+</g>
+<g class="node node-messagebus" data-node-id="monitor" tabindex="0" role="button" aria-label="Monitor &amp; Re-evaluate: new evidence • triggers • replacement">
+<rect class="node-mask" x="1110" y="605" width="210" height="78" rx="12"/>
+<rect class="node-box" x="1110" y="605" width="210" height="78" rx="12"/>
+<text x="1124" y="631" class="node-title">Monitor &amp; Re-evaluate</text>
+<text x="1124" y="653" class="node-sub">new evidence • triggers • replacement</text>
+<rect x="1247" y="613" width="65" height="18" rx="9" class="tag-bg"/><text x="1279.5" y="626" text-anchor="middle" class="tag-text">Perform</text>
+</g>
+</svg>
+      <aside id="details" class="details"><h4 id="detailsTitle"></h4><p id="detailsText"></p></aside>
+    
+<div id="valuationOverlay" class="node-overlay" data-node-target="valuation" aria-label="Valuation node controls">
+  <div class="node-overlay-inner">
+    <div class="node-compare">
+      <input id="nodeExpectedReturn" class="node-input" type="number" inputmode="decimal" step="0.5" value="14" aria-label="Expected return percent" title="Expected return %">
+      <div class="node-op">&gt;</div>
+      <input id="nodeRequiredReturn" class="node-input" type="number" inputmode="decimal" step="0.5" value="10" aria-label="Required return percent" title="Required return %">
+    </div>
+    <div id="nodeReturnState" class="node-mini-state pass">PASS · 14.0% &gt; 10.0%</div>
+  </div>
+</div>
+
+<div id="riskOverlay" class="node-overlay" data-node-target="risk_gate" aria-label="Risk and invalidation node controls">
+  <div class="node-overlay-inner">
+    <div class="node-toggle" role="group" aria-label="Thesis intact">
+      <button type="button" id="nodeThesisYes" class="selected" aria-pressed="true">YES</button>
+      <button type="button" id="nodeThesisNo" aria-pressed="false">NO</button>
+    </div>
+    <div id="nodeThesisState" class="node-mini-state pass">PASS · thesis intact</div>
+  </div>
+</div>
+
+    </div>
+    <div class="views" id="views"></div>
+    <div class="view-note" id="viewNote">Choose a guided view, click a node, or search.</div>
+    <div class="legend">
+      <span><i style="background:#94a3b8"></i>Evidence source</span>
+      <span><i style="background:#34d399"></i>Analysis</span>
+      <span><i style="background:#fb7185"></i>Risk / decision gate</span>
+      <span><i style="background:#22d3ee"></i>Action</span>
+      <span><i style="background:#a78bfa"></i>Portfolio state</span>
+      <span><i style="background:#fb923c"></i>Feedback / monitoring</span>
+    </div>
+  </section>
+
+  <section class="cards"><article class="card"><div class="card-head"><span class="dot cyan"></span><h3>Decision Principle</h3></div><ul><li>Evidence precedes action; price movement alone is not a thesis.</li><li>Separate opportunity quality from portfolio sizing.</li><li>Make invalidation conditions explicit before implementation.</li></ul></article>
+<article class="card"><div class="card-head"><span class="dot emerald"></span><h3>Asymmetry Test</h3></div><ul><li>Compare expected upside, downside and probability—not forecast precision alone.</li><li>Reject attractive standalone ideas that worsen portfolio concentration or regime exposure.</li><li>Sizing is the final expression of conviction after risk constraints.</li></ul></article>
+<article class="card"><div class="card-head"><span class="dot orange"></span><h3>Feedback Loop</h3></div><ul><li>Monitor whether the causal thesis is strengthening, weakening or unchanged.</li><li>Re-evaluate when new evidence arrives or an invalidation condition is approached.</li><li>A valid replacement opportunity can be a reason to exit even without thesis failure.</li></ul></article></section>
+  <div class="footer"><span>Archify 2.15-compatible architecture IR • fallback viewer composition</span><span>DEEP tags: Discover → Educate → Evaluate → Perform</span></div>
+</main>
+
+<script id="decision-rules" type="application/json">{"version": 1, "rules": [{"id": "thesis_intact", "type": "boolean", "label": "Thesis intact?", "true_path": "continue", "false_path": "exit_re_evaluate"}, {"id": "return_hurdle", "type": "comparison", "left": "expected_return_pct", "operator": ">", "right": "required_return_pct", "pass_path": "implement", "fail_path": "watch_reject"}], "outcomes": {"implement": "IMPLEMENT", "watch_reject": "WATCH / REJECT", "exit_re_evaluate": "EXIT / RE-EVALUATE"}}</script>
+<script id="archify-spec" type="application/json">{"schema_version": 1, "diagram_type": "architecture", "meta": {"title": "Investment Decision Architecture", "output": "investment-decision-architecture.html", "animation": "none", "quality_profile": "showcase", "viewBox": [1440, 780], "views": [{"id": "evidence-to-thesis", "label": "Evidence → Thesis", "focus": ["market_data", "fundamentals", "macro", "discovery", "research"], "note": "Ideas become investable only after external evidence is converted into a causal thesis."}, {"id": "decision-gate", "label": "Decision Gate", "focus": ["valuation", "risk_gate", "portfolio_fit", "sizing"], "note": "Expected asymmetry is filtered through explicit failure conditions, portfolio interaction and risk budget."}, {"id": "feedback-loop", "label": "Live Feedback Loop", "focus": ["implement", "position", "monitor", "research", "risk_gate"], "note": "A live position is continuously re-evaluated against new evidence and its original invalidation conditions."}], "legend": {"mode": "all", "entries": {"external": {"label": "Evidence source"}, "backend": {"label": "Analysis"}, "security": {"label": "Risk / decision gate"}, "frontend": {"label": "Action"}, "database": {"label": "Portfolio state"}, "messagebus": {"label": "Feedback / monitoring"}}}}, "components": [{"id": "market_data", "type": "external", "label": "Market Data", "sublabel": "price • volume • volatility", "tag": "Discover", "pos": [65, 135], "size": [190, 72]}, {"id": "fundamentals", "type": "external", "label": "Fundamentals", "sublabel": "earnings • balance sheet • cash flow", "tag": "Educate", "pos": [65, 270], "size": [190, 72]}, {"id": "macro", "type": "external", "label": "Macro / Cross-Asset", "sublabel": "rates • liquidity • regimes", "tag": "Educate", "pos": [65, 405], "size": [190, 72]}, {"id": "discovery", "type": "backend", "label": "Opportunity Discovery", "sublabel": "screening • dislocations • catalysts", "tag": "Discover", "pos": [330, 135], "size": [210, 78]}, {"id": "research", "type": "backend", "label": "Research & Thesis", "sublabel": "drivers • causality • evidence", "tag": "Educate", "pos": [330, 305], "size": [210, 78]}, {"id": "valuation", "type": "backend", "label": "Valuation / Asymmetry", "sublabel": "expected value • upside/downside", "tag": "Evaluate", "pos": [590, 305], "size": [210, 78]}, {"id": "risk_gate", "type": "security", "label": "Risk & Invalidation", "sublabel": "failure modes • exit conditions", "tag": "Evaluate", "pos": [850, 190], "size": [210, 78]}, {"id": "portfolio_fit", "type": "security", "label": "Portfolio Fit", "sublabel": "correlation • concentration • regime", "tag": "Evaluate", "pos": [850, 335], "size": [210, 78]}, {"id": "sizing", "type": "backend", "label": "Position Sizing", "sublabel": "risk budget • conviction • liquidity", "tag": "Evaluate", "pos": [850, 480], "size": [210, 78]}, {"id": "implement", "type": "frontend", "label": "Implement", "sublabel": "instrument • timing • execution plan", "tag": "Perform", "pos": [1110, 305], "size": [190, 78]}, {"id": "position", "type": "database", "label": "Live Position", "sublabel": "exposure • P&L • thesis state", "tag": "Perform", "pos": [1110, 455], "size": [190, 78]}, {"id": "monitor", "type": "messagebus", "label": "Monitor & Re-evaluate", "sublabel": "new evidence • triggers • replacement", "tag": "Perform", "pos": [1110, 605], "size": [210, 78]}], "boundaries": [{"kind": "region", "label": "External Evidence", "wraps": ["market_data", "fundamentals", "macro"], "pad": 25}, {"kind": "region", "label": "Research & Evaluation", "wraps": ["discovery", "research", "valuation"], "pad": 25}, {"kind": "region", "label": "Decision Controls", "wraps": ["risk_gate", "portfolio_fit", "sizing"], "pad": 25}, {"kind": "region", "label": "Implementation & Feedback", "wraps": ["implement", "position", "monitor"], "pad": 25}], "connections": [{"id": "c_market_discovery", "from": "market_data", "to": "discovery", "label": "screen", "variant": "emphasis"}, {"id": "c_fund_research", "from": "fundamentals", "to": "research", "label": "business evidence"}, {"id": "c_macro_research", "from": "macro", "to": "research", "label": "regime context"}, {"id": "c_discovery_research", "from": "discovery", "to": "research", "label": "candidate", "variant": "emphasis"}, {"id": "c_research_valuation", "from": "research", "to": "valuation", "label": "causal thesis", "variant": "emphasis"}, {"id": "c_valuation_risk", "from": "valuation", "to": "risk_gate", "label": "expected asymmetry", "variant": "emphasis"}, {"id": "c_risk_fit", "from": "risk_gate", "to": "portfolio_fit", "label": "survives invalidation test", "variant": "security"}, {"id": "c_fit_sizing", "from": "portfolio_fit", "to": "sizing", "label": "risk allowance", "variant": "emphasis"}, {"id": "c_sizing_implement", "from": "sizing", "to": "implement", "label": "approved exposure", "variant": "emphasis"}, {"id": "c_implement_position", "from": "implement", "to": "position", "label": "filled position", "variant": "emphasis"}, {"id": "c_position_monitor", "from": "position", "to": "monitor", "label": "live state", "variant": "dashed"}, {"id": "c_market_monitor", "from": "market_data", "to": "monitor", "label": "price / volatility", "variant": "dashed"}, {"id": "c_monitor_research", "from": "monitor", "to": "research", "label": "new evidence / thesis update", "variant": "dashed"}, {"id": "c_monitor_risk", "from": "monitor", "to": "risk_gate", "label": "invalidation trigger", "variant": "security"}], "cards": [{"dot": "cyan", "title": "Decision Principle", "items": ["Evidence precedes action; price movement alone is not a thesis.", "Separate opportunity quality from portfolio sizing.", "Make invalidation conditions explicit before implementation."]}, {"dot": "emerald", "title": "Asymmetry Test", "items": ["Compare expected upside, downside and probability—not forecast precision alone.", "Reject attractive standalone ideas that worsen portfolio concentration or regime exposure.", "Sizing is the final expression of conviction after risk constraints."]}, {"dot": "orange", "title": "Feedback Loop", "items": ["Monitor whether the causal thesis is strengthening, weakening or unchanged.", "Re-evaluate when new evidence arrives or an invalidation condition is approached.", "A valid replacement opportunity can be a reason to exit even without thesis failure."]}]}</script>
+<script id="archify-guided-views-data" type="application/json">[{"id": "evidence-to-thesis", "label": "Evidence → Thesis", "focus": ["market_data", "fundamentals", "macro", "discovery", "research"], "note": "Ideas become investable only after external evidence is converted into a causal thesis."}, {"id": "decision-gate", "label": "Decision Gate", "focus": ["valuation", "risk_gate", "portfolio_fit", "sizing"], "note": "Expected asymmetry is filtered through explicit failure conditions, portfolio interaction and risk budget."}, {"id": "feedback-loop", "label": "Live Feedback Loop", "focus": ["implement", "position", "monitor", "research", "risk_gate"], "note": "A live position is continuously re-evaluated against new evidence and its original invalidation conditions."}]</script>
+<script>
+const spec = JSON.parse(document.getElementById('archify-spec').textContent);
+const views = JSON.parse(document.getElementById('archify-guided-views-data').textContent);
+const nodeEls = [...document.querySelectorAll('.node')];
+const edgeEls = [...document.querySelectorAll('.edge')];
+const details = document.getElementById('details');
+const note = document.getElementById('viewNote');
+
+function resetFocus() {
+  nodeEls.forEach(n => n.classList.remove('dim','focus'));
+  edgeEls.forEach(e => e.classList.remove('dim','focus'));
+  [...document.querySelectorAll('.views button')].forEach(b => b.classList.remove('active'));
+  details.classList.remove('show');
+  note.textContent = 'Choose a guided view, click a node, or search.';
+}
+function focusSet(ids, noteText='') {
+  const set = new Set(ids);
+  nodeEls.forEach(n => {
+    const on = set.has(n.dataset.nodeId);
+    n.classList.toggle('focus', on);
+    n.classList.toggle('dim', !on);
+  });
+  edgeEls.forEach(e => {
+    const on = set.has(e.dataset.from) && set.has(e.dataset.to);
+    e.classList.toggle('focus', on);
+    e.classList.toggle('dim', !on);
+  });
+  note.textContent = noteText || 'Focused relationship set.';
+}
+const viewsHost = document.getElementById('views');
+views.forEach(v => {
+  const b = document.createElement('button');
+  b.textContent = v.label;
+  b.addEventListener('click', () => {
+    [...viewsHost.children].forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    focusSet(v.focus, v.note);
+  });
+  viewsHost.appendChild(b);
+});
+nodeEls.forEach(n => {
+  n.addEventListener('click', () => {
+    const id = n.dataset.nodeId;
+    const c = spec.components.find(x => x.id === id);
+    const neighbors = new Set([id]);
+    spec.connections.forEach(e => {
+      if (e.from === id) neighbors.add(e.to);
+      if (e.to === id) neighbors.add(e.from);
+    });
+    focusSet([...neighbors], `Selected ${c.label} and its authored immediate relationships.`);
+    document.getElementById('detailsTitle').textContent = c.label;
+    document.getElementById('detailsText').textContent = `${c.sublabel || ''}${c.tag ? ' • DEEP: ' + c.tag : ''}`;
+    details.classList.add('show');
+  });
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.getElementById('search').value = '';
+  resetFocus();
+});
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const root = document.documentElement;
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+});
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.trim().toLowerCase();
+  if (!q) return resetFocus();
+  const hits = spec.components.filter(c => [c.label,c.sublabel,c.tag].filter(Boolean).join(' ').toLowerCase().includes(q)).map(c=>c.id);
+  focusSet(hits, hits.length ? `${hits.length} matching node${hits.length===1?'':'s'}.` : 'No matching nodes.');
+});
+document.getElementById('svgBtn').addEventListener('click', () => {
+  const source = new XMLSerializer().serializeToString(document.getElementById('diagram'));
+  const blob = new Blob([source], {type:'image/svg+xml'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'investment-decision-architecture.svg';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+</script>
+
+
+
+
+<script>
+(() => {
+  const diagramWrap = document.querySelector('.diagram-wrap');
+  const expected = document.getElementById('nodeExpectedReturn');
+  const required = document.getElementById('nodeRequiredReturn');
+  const yes = document.getElementById('nodeThesisYes');
+  const no = document.getElementById('nodeThesisNo');
+  const returnState = document.getElementById('nodeReturnState');
+  const thesisState = document.getElementById('nodeThesisState');
+  const note = document.getElementById('viewNote');
+  let thesisIntact = true;
+
+  const implementNodes = new Set([
+    'market_data','fundamentals','macro','discovery','research','valuation',
+    'risk_gate','portfolio_fit','sizing','implement','position','monitor'
+  ]);
+  const watchNodes = new Set([
+    'market_data','fundamentals','macro','discovery','research','valuation','risk_gate','monitor'
+  ]);
+  const exitNodes = new Set(['position','monitor','research','risk_gate']);
+
+  const implementEdges = new Set([
+    'c_market_discovery','c_fund_research','c_macro_research','c_discovery_research',
+    'c_research_valuation','c_valuation_risk','c_risk_fit','c_fit_sizing',
+    'c_sizing_implement','c_implement_position','c_position_monitor'
+  ]);
+  const watchEdges = new Set([
+    'c_market_discovery','c_fund_research','c_macro_research','c_discovery_research',
+    'c_research_valuation','c_valuation_risk','c_market_monitor','c_monitor_research'
+  ]);
+  const exitEdges = new Set(['c_position_monitor','c_monitor_research','c_monitor_risk']);
+
+  function placeOverlay(overlay) {
+    const id = overlay.dataset.nodeTarget;
+    const node = document.querySelector(`[data-node-id="${id}"] .node-box`);
+    if (!node || !diagramWrap) return;
+    const nr = node.getBoundingClientRect();
+    const wr = diagramWrap.getBoundingClientRect();
+
+    // Place controls over the lower 46% of the visible SVG node.
+    overlay.style.left = `${nr.left - wr.left + diagramWrap.scrollLeft}px`;
+    overlay.style.top = `${nr.top - wr.top + diagramWrap.scrollTop + nr.height * 0.49}px`;
+    overlay.style.width = `${nr.width}px`;
+    overlay.style.height = `${nr.height * 0.51}px`;
+  }
+
+  function placeAll() {
+    document.querySelectorAll('.node-overlay').forEach(placeOverlay);
+  }
+
+  function readNum(el) {
+    const n = Number(el.value);
+    return Number.isFinite(n) ? Math.max(-1000, Math.min(1000, n)) : 0;
+  }
+
+  function clearRoute() {
+    document.querySelectorAll('.node').forEach(n => {
+      n.classList.remove('decision-pass','decision-fail','decision-watch','dim','focus');
+    });
+    document.querySelectorAll('.edge').forEach(e => {
+      e.classList.remove('decision-active','decision-exit','decision-watch','dim','focus');
+    });
+  }
+
+  function setRoute(nodeSet, edgeSet, kind) {
+    document.querySelectorAll('.node').forEach(n => {
+      const active = nodeSet.has(n.dataset.nodeId);
+      n.classList.toggle('dim', !active);
+      n.classList.toggle('focus', active);
+    });
+    document.querySelectorAll('.edge').forEach(e => {
+      const active = edgeSet.has(e.dataset.edgeId);
+      e.classList.toggle('dim', !active);
+      if (active) e.classList.add(
+        kind === 'pass' ? 'decision-active' :
+        kind === 'fail' ? 'decision-exit' : 'decision-watch'
+      );
+    });
+  }
+
+  function evaluate() {
+    clearRoute();
+
+    const exp = readNum(expected);
+    const req = readNum(required);
+    const returnPass = exp > req;
+
+    yes.classList.toggle('selected', thesisIntact);
+    no.classList.toggle('selected', !thesisIntact);
+    yes.setAttribute('aria-pressed', String(thesisIntact));
+    no.setAttribute('aria-pressed', String(!thesisIntact));
+
+    thesisState.textContent = thesisIntact ? 'PASS · thesis intact' : 'FAIL · invalidated';
+    thesisState.className = 'node-mini-state ' + (thesisIntact ? 'pass' : 'fail');
+
+    returnState.textContent = returnPass
+      ? `PASS · ${exp.toFixed(1)}% > ${req.toFixed(1)}%`
+      : `FAIL · ${exp.toFixed(1)}% ≤ ${req.toFixed(1)}%`;
+    returnState.className = 'node-mini-state ' + (returnPass ? 'pass' : 'watch');
+
+    const valuationNode = document.querySelector('[data-node-id="valuation"]');
+    const riskNode = document.querySelector('[data-node-id="risk_gate"]');
+
+    if (!thesisIntact) {
+      setRoute(exitNodes, exitEdges, 'fail');
+      riskNode?.classList.add('decision-fail');
+      note.textContent = 'EXIT / RE-EVALUATE — thesis invalidation activates the feedback path.';
+    } else if (!returnPass) {
+      setRoute(watchNodes, watchEdges, 'watch');
+      valuationNode?.classList.add('decision-watch');
+      riskNode?.classList.add('decision-pass');
+      note.textContent = 'WATCH / REJECT — thesis survives, but expected return does not clear the hurdle.';
+    } else {
+      setRoute(implementNodes, implementEdges, 'pass');
+      valuationNode?.classList.add('decision-pass');
+      riskNode?.classList.add('decision-pass');
+      note.textContent = 'IMPLEMENT — both node-level decision gates pass.';
+    }
+    requestAnimationFrame(placeAll);
+  }
+
+  yes.addEventListener('click', e => { e.stopPropagation(); thesisIntact = true; evaluate(); });
+  no.addEventListener('click', e => { e.stopPropagation(); thesisIntact = false; evaluate(); });
+  expected.addEventListener('input', evaluate);
+  required.addEventListener('input', evaluate);
+
+  document.querySelectorAll('.node-overlay').forEach(o => {
+    o.addEventListener('click', e => e.stopPropagation());
+    o.addEventListener('pointerdown', e => e.stopPropagation());
+  });
+
+  window.addEventListener('resize', placeAll);
+  diagramWrap?.addEventListener('scroll', placeAll, {passive:true});
+
+  // Re-anchor after the existing search/reset/viewer controls make any visual changes.
+  document.addEventListener('click', () => requestAnimationFrame(placeAll));
+
+  evaluate();
+  requestAnimationFrame(placeAll);
+})();
+</script>
+
+</body>
+</html>
